@@ -12,7 +12,7 @@ impl std::fmt::Debug for PathedIoError {
     }
 }
 
-fn main() {
+fn main() -> Result<(), &'static str> {
     let contents = read_input().unwrap();
     let mut current: i32 = 0;
     let mut total_items: Vec<i32> = Vec::new();
@@ -37,6 +37,8 @@ fn main() {
     }
     println!("Max {}", max);
     println!("Top Three {}", top_three);
+
+    Ok(())
 }
 
 fn read_input() -> Result<String, PathedIoError> {
