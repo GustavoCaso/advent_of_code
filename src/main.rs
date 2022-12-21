@@ -5,8 +5,7 @@ fn main() -> Result<(), &'static str> {
 
     for group in contents.split("\n\n") {
         let mut current: i32 = 0;
-        for line in group.lines() {
-            let number: i32 = line.parse().unwrap();
+        for number in group.lines().map(|v| v.parse::<i32>().unwrap()) {
             current += number;
         }
         total_items.push(current);
