@@ -2,10 +2,7 @@ use std::env;
 use std::fs;
 
 fn main() {
-    let mut current_dir = env::current_dir().unwrap();
-    current_dir.push("src/input.txt");
-
-    let contents = fs::read_to_string(current_dir.as_path()).expect("Fail to read input.txt");
+    let contents = read_input().unwrap();
     let mut current: i32 = 0;
     let mut total_items: Vec<i32> = Vec::new();
     for line in contents.lines() {
@@ -29,4 +26,14 @@ fn main() {
     }
     println!("Max {}", max);
     println!("Top Three {}", top_three);
+}
+
+fn read_input() -> Result<String, std::io::Error> {
+    let mut current_dir = env::current_dir().unwrap();
+    current_dir.push("src/input.txt");
+
+    match fs::read_to_string(current_dir.as_path()) {
+        Ok(s) => Ok(s),
+        Err(e) => Err(e),
+    }
 }
