@@ -1,18 +1,23 @@
-#[repr(transparent)]
-struct Item(u8);
+mod item {
+    #[repr(transparent)]
+    struct Item(u8);
 
-struct TypeParseError;
+    struct TypeParseError;
 
-impl TryFrom<u8> for Item {
-    type Error = TypeParseError;
+    impl TryFrom<u8> for Item {
+        type Error = TypeParseError;
 
-    //  We use pattern matching for binary representation
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            b'a'..=b'z' | b'A'..=b'Z' => Ok(Self(value)),
-            _ => Err(TypeParseError),
+        //  We use pattern matching for binary representation
+        fn try_from(value: u8) -> Result<Self, Self::Error> {
+            match value {
+                b'a'..=b'z' | b'A'..=b'Z' => Ok(Self(value)),
+                _ => Err(TypeParseError),
+            }
         }
     }
 }
+
+// Encapsulate item on a separate module
+use item::Item;
 
 fn main() {}
