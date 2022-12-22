@@ -1,9 +1,7 @@
-use std::assert_eq;
-
 struct Priority;
 
 impl Priority {
-    fn value(c: char) -> u32 {
+    fn value(c: char) -> usize {
         match c {
             'a' => 1,
             'b' => 2,
@@ -17,7 +15,7 @@ impl Priority {
             'j' => 10,
             'k' => 11,
             'l' => 12,
-            'm' => 14,
+            'm' => 13,
             'n' => 14,
             'o' => 15,
             'p' => 16,
@@ -63,28 +61,17 @@ impl Priority {
 }
 
 fn main() {
-    let mut total: u32 = 0;
-    let content = include_str!("input.txt");
-    let mut total_matches = 0;
-    for line in content.lines() {
+    let mut total = 0;
+    for line in include_str!("input.txt").lines() {
         let (first_part, second_part) = line.split_at(line.len() / 2);
-        assert_eq!(first_part.len(), second_part.len());
 
         for c in first_part.chars() {
             if second_part.contains(c) {
-                total_matches += 1;
-                println!(
-                    "{}, {}, {}, {}, {}",
-                    total_matches,
-                    first_part,
-                    second_part,
-                    c,
-                    Priority::value(c)
-                );
                 total += Priority::value(c);
                 break;
             }
         }
     }
+
     println!("{}", total);
 }
