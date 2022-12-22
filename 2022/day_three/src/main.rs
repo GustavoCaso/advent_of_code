@@ -1,8 +1,8 @@
 mod item {
     #[repr(transparent)]
-    struct Item(u8);
-
-    struct TypeParseError;
+    pub(crate) struct Item(u8);
+    #[derive(Debug)]
+    pub(crate) struct TypeParseError;
 
     impl TryFrom<u8> for Item {
         type Error = TypeParseError;
@@ -18,6 +18,8 @@ mod item {
 }
 
 // Encapsulate item on a separate module
-use item::Item;
+use item::{Item, TypeParseError};
 
-fn main() {}
+fn main() -> Result<(), TypeParseError> {
+    Ok(())
+}
