@@ -1,131 +1,116 @@
+use core::str::FromStr;
+
+#[derive(Debug, Clone, Copy)]
+enum GameResult {
+    Win,
+    Lost,
+    Draw,
+}
+
+impl GameResult {
+    fn inherent_points(self) -> usize {
+        match self {
+            GameResult::Win => 6,
+            GameResult::Draw => 3,
+            GameResult::Lost => 0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 enum Hand {
     Rock,
     Paper,
     Scissors,
 }
 
-enum Result {
-    Win,
-    Lost,
-    Draw,
+impl Hand {
+    fn inherent_points(self) -> usize {
+        match self {
+            Hand::Rock => 1,
+            Hand::Paper => 2,
+            Hand::Scissors => 3,
+        }
+    }
+
+    fn beats(self, opponent: Hand) -> bool {
+        matches!(
+            (self, opponent),
+            (Self::Rock, Self::Scissors)
+                | (Self::Paper, Self::Rock)
+                | (Self::Scissors, Self::Paper)
+        )
+    }
+
+    fn outcome(self, opponent: Hand) -> GameResult {
+        if self.beats(opponent) {
+            return GameResult::Win;
+        } else if opponent.beats(self) {
+            return GameResult::Lost;
+        } else {
+            GameResult::Draw
+        }
+    }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct ParseHandError;
+
+impl TryFrom<char> for Hand {
+    type Error = ParseHandError;
+
+    fn try_from(c: char) -> Result<Self, Self::Error> {
+        match c {
+            'A' | 'X' => Ok(Hand::Rock),
+            'B' | 'Y' => Ok(Hand::Paper),
+            'C' | 'Z' => Ok(Hand::Scissors),
+            _ => Err(ParseHandError),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 struct Game {
     opponent: Hand,
     me: Hand,
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct ParseGameError;
+
+impl FromStr for Game {
+    type Err = ParseHandError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut chars = s.chars();
+
+        let (Some(opponent), Some(' '), Some(me), None) = (chars.next(), chars.next(), chars.next(), chars.next()) else {
+            return Err(ParseHandError)
+        };
+
+        Ok(Self {
+            opponent: opponent.try_into()?,
+            me: me.try_into()?,
+        })
+    }
+}
+
 impl Game {
-    fn new(hand: String) -> Self {
-        let values = hand.split(' ').collect::<Vec<&str>>();
-        let oponent_hand = match values[0] {
-            "A" => Hand::Rock,
-            "B" => Hand::Paper,
-            "C" => Hand::Scissors,
-            &_ => todo!(),
-        };
-        let me_hand = match values[1] {
-            "X" => Hand::Rock,
-            "Y" => Hand::Paper,
-            "Z" => Hand::Scissors,
-            &_ => todo!(),
-        };
-        Self {
-            opponent: oponent_hand,
-            me: me_hand,
-        }
+    fn outcome(self) -> GameResult {
+        self.me.outcome(self.opponent)
     }
 
-    fn result(&self) -> i16 {
-        match self.me {
-            Hand::Rock => match self.opponent {
-                Hand::Rock => 3 + 1,
-                Hand::Paper => 0 + 1,
-                Hand::Scissors => 6 + 1,
-            },
-            Hand::Paper => match self.opponent {
-                Hand::Rock => 6 + 2,
-                Hand::Paper => 3 + 2,
-                Hand::Scissors => 0 + 2,
-            },
-            Hand::Scissors => match self.opponent {
-                Hand::Rock => 0 + 3,
-                Hand::Paper => 6 + 3,
-                Hand::Scissors => 3 + 3,
-            },
-        }
+    fn our_score(self) -> usize {
+        self.me.inherent_points() + self.outcome().inherent_points()
     }
 }
 
-struct GameV2 {
-    opponent: Hand,
-    result: Result,
-}
-
-impl GameV2 {
-    fn new(hand: String) -> Self {
-        let values = hand.split(' ').collect::<Vec<&str>>();
-        let oponent_hand = match values[0] {
-            "A" => Hand::Rock,
-            "B" => Hand::Paper,
-            "C" => Hand::Scissors,
-            &_ => todo!(),
-        };
-        let result = match values[1] {
-            "X" => Result::Lost,
-            "Y" => Result::Draw,
-            "Z" => Result::Win,
-            &_ => todo!(),
-        };
-        Self {
-            opponent: oponent_hand,
-            result: result,
-        }
+fn main() -> Result<(), ParseHandError> {
+    let mut total_score = 0;
+    for game in include_str!("input.txt").lines().map(Game::from_str) {
+        total_score += game?.our_score();
     }
 
-    fn result(&self) -> i16 {
-        match self.result {
-            Result::Lost => match self.opponent {
-                Hand::Rock => 0 + 3,
-                Hand::Paper => 0 + 1,
-                Hand::Scissors => 0 + 2,
-            },
-            Result::Win => match self.opponent {
-                Hand::Rock => 6 + 2,
-                Hand::Paper => 6 + 3,
-                Hand::Scissors => 6 + 1,
-            },
-            Result::Draw => match self.opponent {
-                Hand::Rock => 3 + 1,
-                Hand::Paper => 3 + 2,
-                Hand::Scissors => 3 + 3,
-            },
-        }
-    }
-}
-
-fn main() {
-    let hands = include_str!("input.txt");
-    part_one(hands);
-    part_two(hands)
-}
-
-fn part_one(hands: &str) {
-    let mut results = 0;
-    for hand in hands.lines() {
-        let game = Game::new(hand.to_string());
-        results += game.result();
-    }
-
-    println!("{}", results);
-}
-
-fn part_two(hands: &str) {
-    let mut results = 0;
-    for hand in hands.lines() {
-        let game = GameV2::new(hand.to_string());
-        results += game.result();
-    }
-
-    println!("{}", results);
+    println!("{}", total_score);
+    Ok(())
 }
