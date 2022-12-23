@@ -1,5 +1,6 @@
 mod item {
     #[repr(transparent)]
+    #[derive(Copy, Clone, PartialEq)]
     pub(crate) struct Item(u8);
     #[derive(Debug)]
     pub(crate) struct TypeParseError;
@@ -36,5 +37,33 @@ mod item {
 use item::{Item, TypeParseError};
 
 fn main() -> Result<(), TypeParseError> {
+    let mut total_score = 0;
+
+    for line in include_str!("input.txt").lines() {
+        let (first, second) = line.split_at(line.len() / 2);
+
+        let first_items = first
+            .bytes()
+            .map(Item::try_from)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let dupe_score = second
+            .bytes()
+            .map(Item::try_from)
+            .find_map(|item| {
+                item.ok().and_then(|item| {
+                    first_items
+                        .iter()
+                        .copied()
+                        .find(|&first_item| first_item == item)
+                })
+            })
+            .expect("there should be exactly one duplicate")
+            .priority();
+
+        total_score += dupe_score;
+    }
+
+    println!("{}", total_score);
     Ok(())
 }
