@@ -37,6 +37,12 @@ mod item {
 use item::{Item, TypeParseError};
 
 fn main() -> Result<(), TypeParseError> {
+    part1();
+
+    Ok(())
+}
+
+fn part1() -> Result<(), TypeParseError> {
     let mut total_score = 0;
 
     for line in include_str!("input.txt").lines() {
