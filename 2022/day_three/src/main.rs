@@ -37,7 +37,8 @@ mod item {
 use item::{Item, TypeParseError};
 
 fn main() -> Result<(), TypeParseError> {
-    part1();
+    part1()?;
+    part2()?;
 
     Ok(())
 }
@@ -71,5 +72,39 @@ fn part1() -> Result<(), TypeParseError> {
     }
 
     println!("{}", total_score);
+    Ok(())
+}
+
+fn part2() -> Result<(), TypeParseError> {
+    let mut total_score = 0;
+    let mut groups = Vec::<Vec<&str>>::new();
+    let mut group = Vec::<&str>::new();
+
+    for line in include_str!("input.txt").lines() {
+        if group.len() == 2 {
+            group.push(line);
+            groups.push(group);
+            group = Vec::<&str>::new();
+        } else {
+            group.push(line);
+        }
+    }
+
+    for group in groups {
+        let first = group[0];
+        let second = group[1];
+        let third = group[2];
+
+        for letter in first.chars() {
+            if second.contains(letter) && third.contains(letter) {
+                let value = letter as u8;
+                let item = Item::try_from(value)?;
+                total_score += item.priority();
+                break;
+            }
+        }
+    }
+    println!("{}", total_score);
+
     Ok(())
 }
